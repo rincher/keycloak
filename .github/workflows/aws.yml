@@ -53,14 +53,15 @@ jobs:
               {
                 "name": "${{ env.CONTAINER_NAME }}",
                 "image": "${{ env.KEYCLOAK_IMAGE }}",
-                "portMappings": [{ "containerPort": 8080 }],
+                "portMappings": [{ "containerPort": 8080 },{ "containerPort": 8443 }],
                 "environment": [
                   { "name": "KEYCLOAK_ADMIN", "value": "admin" },
                   { "name": "KEYCLOAK_ADMIN_PASSWORD", "value": "admin" },
                   { "name": "KC_DB", "value": "postgres" },
                   { "name": "KC_DB_URL", "value": "jdbc:postgresql://keycloak.c2b2wgk08yd3.us-east-1.rds.amazonaws.com:5432/keycloak" },
                   { "name": "KC_DB_USERNAME", "value": "${{ env.KC_DB_USERNAME }}" },
-                  { "name": "KC_DB_PASSWORD", "value": "${{ env.KC_DB_PASSWORD }}" }
+                  { "name": "KC_DB_PASSWORD", "value": "${{ env.KC_DB_PASSWORD }}" },
+                  { "name": "KC_HOSTNAME", "value": "keycloak.hyundong.shop" }
                 ],
                 "command": ["start"],
                 "essential": true,
