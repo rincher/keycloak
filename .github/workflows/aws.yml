@@ -35,8 +35,8 @@ jobs:
         id: secrets
         run: |
           DB_CREDS=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
-          echo "KC_DB_USERNAME=$(echo $DB_CREDS | jq -r .KC_DB_USERNAME)" >> $GITHUB_ENV
-          echo "KC_DB_PASSWORD=$(echo $DB_CREDS | jq -r .KC_DB_PASSWORD)" >> $GITHUB_ENV
+          echo "KC_DB_USERNAME=$(echo $DB_CREDS | jq -r .username)" >> $GITHUB_ENV
+          echo "KC_DB_PASSWORD=$(echo $DB_CREDS | jq -r .password)" >> $GITHUB_ENV
 
       - name: Register new ECS Task Definition revision
         id: register-task
