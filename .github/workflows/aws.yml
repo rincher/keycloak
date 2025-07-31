@@ -1,4 +1,4 @@
-name: Deploy Keycloak to ECS
+name: Deploy Keycloak Official Image to ECS
 
 on:
   push:
@@ -6,13 +6,12 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPO: keycloak
   ECS_CLUSTER: keycloak
   ECS_SERVICE: keycloak-service
   ECS_TASK_FAMILY: keycloak
   SECRET_NAME: ${{ secrets.SECRET_NAME }}
   CONTAINER_NAME: keycloak
-  IMAGE_TAG: ${{ github.sha }}
+  KEYCLOAK_IMAGE: quay.io/keycloak/keycloak:24.0.3 # 공식 이미지 사용
 
 permissions:
   contents: read
@@ -32,18 +31,6 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/githuboidc
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          mask-password: true
-
-      - name: Build, tag, and push Docker image
-        run: |
-          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:$IMAGE_TAG"
-          docker build -t $IMAGE_URI .
-          docker push $IMAGE_URI
-
       - name: Get secrets from Secrets Manager
         id: secrets
         run: |
@@ -54,8 +41,6 @@ jobs:
       - name: Register new ECS Task Definition revision
         id: register-task
         run: |
-          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:$IMAGE_TAG"
-
           cat <<EOF > task-def.json
           {
             "family": "${{ env.ECS_TASK_FAMILY }}",
@@ -66,8 +51,8 @@ jobs:
             "executionRoleArn": "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole",
             "containerDefinitions": [
               {
-                "name": "keycloak",
-                "image": "$IMAGE_URI",
+                "name": "${{ env.CONTAINER_NAME }}",
+                "image": "${{ env.KEYCLOAK_IMAGE }}",
                 "portMappings": [{ "containerPort": 8080 }],
                 "environment": [
                   { "name": "KEYCLOAK_ADMIN", "value": "admin" },
