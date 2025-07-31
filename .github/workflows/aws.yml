@@ -59,7 +59,10 @@ jobs:
                   { "name": "KEYCLOAK_ADMIN_PASSWORD", "value": "admin" },
                   { "name": "KC_DB", "value": "postgres" },
                   { "name": "KC_DB_URL", "value": "jdbc:postgresql://keycloak.c2b2wgk08yd3.us-east-1.rds.amazonaws.com:5432/keycloak" },
-                  { "name": "KC_HOSTNAME", "value": "keycloak.hyundong.shop" }
+                  { "name": "KC_HOSTNAME", "value": "keycloak.hyundong.shop" },
+                  { "name": "KC_HTTP_ENABLED", "value": "true" },
+                  { "name": "KC_PROXY_HEADERS", "value": "xforwarded" }
+                  
                 ],
                 "secrets": [
                   { "name": "KC_DB_USERNAME", "value": "${{ env.KC_DB_USERNAME }}" },
