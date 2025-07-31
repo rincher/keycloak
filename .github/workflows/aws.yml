@@ -63,7 +63,15 @@ jobs:
                   { "name": "KC_DB_PASSWORD", "value": "${{ env.KC_DB_PASSWORD }}" }
                 ],
                 "command": ["start"],
-                "essential": true
+                "essential": true,
+                "logConfiguration": {
+                  "logDriver": "awslogs",
+                  "options": {
+                    "awslogs-group": "/ecs/keycloak",
+                    "awslogs-region": "${{ env.AWS_REGION }}",
+                    "awslogs-stream-prefix": "keycloak"
+                  }
+                }
               }
             ]
           }
