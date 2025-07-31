@@ -11,84 +11,84 @@ env:
   ECS_SERVICE: keycloak-service
   ECS_TASK_FAMILY: keycloak
   SECRET_NAME: rds!db-0deeb6e5-429b-47e0-8b9a-2b46d98eb11d
-  CONTAINER_NAME: keycloak # Task Definition 내 컨테이너 이름
-  IMAGE_TAG: ${{ github.sha }} # Docker 이미지 태그 (커밋 SHA)
+  CONTAINER_NAME: keycloak
+  IMAGE_TAG: ${{ github.sha }}
 
 permissions:
-  contents: read # for actions/checkout
-  id-token: write # for OIDC
+  contents: read
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/githuboidc # replace with your IAM Role ARN
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/githuboidc
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-      with:
-        mask-password: true
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
 
-    - name: Build, tag, and push Docker image
-      run: |
-        IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:$IMAGE_TAG"
-        docker build -t $IMAGE_URI .
-        docker push $IMAGE_URI
+      - name: Build, tag, and push Docker image
+        run: |
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:$IMAGE_TAG"
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
 
-    - name: Get secrets from Secrets Manager
-      id: secrets
-      run: |
-        DB_CREDS=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
-        echo "KC_DB_USERNAME=$(echo $DB_CREDS | jq -r .KC_DB_USERNAME)" >> $GITHUB_ENV
-        echo "KC_DB_PASSWORD=$(echo $DB_CREDS | jq -r .KC_DB_PASSWORD)" >> $GITHUB_ENV
+      - name: Get secrets from Secrets Manager
+        id: secrets
+        run: |
+          DB_CREDS=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
+          echo "KC_DB_USERNAME=$(echo $DB_CREDS | jq -r .KC_DB_USERNAME)" >> $GITHUB_ENV
+          echo "KC_DB_PASSWORD=$(echo $DB_CREDS | jq -r .KC_DB_PASSWORD)" >> $GITHUB_ENV
 
-    - name: Register new ECS Task Definition revision
-      id: register-task
-      run: |
-        IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:$IMAGE_TAG"
+      - name: Register new ECS Task Definition revision
+        id: register-task
+        run: |
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:$IMAGE_TAG"
 
-        cat <<EOF > task-def.json
-        {
-          "family": "${{ env.ECS_TASK_FAMILY }}",
-          "networkMode": "awsvpc",
-          "requiresCompatibilities": ["FARGATE"],
-          "cpu": "512",
-          "memory": "1024",
-          "executionRoleArn": "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole",
-          "containerDefinitions": [
-            {
-              "name": "keycloak",
-              "image": "$IMAGE_URI",
-              "portMappings": [{ "containerPort": 8080 }],
-              "environment": [
-                { "name": "KEYCLOAK_ADMIN", "value": "admin" },
-                { "name": "KEYCLOAK_ADMIN_PASSWORD", "value": "admin" },
-                { "name": "KC_DB", "value": "postgres" },
-                { "name": "KC_DB_URL", "value": "jdbc:postgresql://keycloak.c2b2wgk08yd3.us-east-1.rds.amazonaws.com:5432/keycloak" },
-                { "name": "KC_DB_USERNAME", "value": "${{ env.KC_DB_USERNAME }}" },
-                { "name": "KC_DB_PASSWORD", "value": "${{ env.KC_DB_PASSWORD }}" }
-              ],
-              "command": ["start"],
-              "essential": true
-            }
-          ]
-        }
-        EOF
+          cat <<EOF > task-def.json
+          {
+            "family": "${{ env.ECS_TASK_FAMILY }}",
+            "networkMode": "awsvpc",
+            "requiresCompatibilities": ["FARGATE"],
+            "cpu": "512",
+            "memory": "1024",
+            "executionRoleArn": "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole",
+            "containerDefinitions": [
+              {
+                "name": "keycloak",
+                "image": "$IMAGE_URI",
+                "portMappings": [{ "containerPort": 8080 }],
+                "environment": [
+                  { "name": "KEYCLOAK_ADMIN", "value": "admin" },
+                  { "name": "KEYCLOAK_ADMIN_PASSWORD", "value": "admin" },
+                  { "name": "KC_DB", "value": "postgres" },
+                  { "name": "KC_DB_URL", "value": "jdbc:postgresql://keycloak.c2b2wgk08yd3.us-east-1.rds.amazonaws.com:5432/keycloak" },
+                  { "name": "KC_DB_USERNAME", "value": "${{ env.KC_DB_USERNAME }}" },
+                  { "name": "KC_DB_PASSWORD", "value": "${{ env.KC_DB_PASSWORD }}" }
+                ],
+                "command": ["start"],
+                "essential": true
+              }
+            ]
+          }
+          EOF
 
-        aws ecs register-task-definition --cli-input-json file://task-def.json
+          aws ecs register-task-definition --cli-input-json file://task-def.json
 
-    - name: Update ECS Service
-      run: |
-        aws ecs update-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service ${{ env.ECS_SERVICE }} \
-          --force-new-deployment
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment
