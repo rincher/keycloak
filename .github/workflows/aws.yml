@@ -64,7 +64,7 @@ jobs:
                 "secrets": [
                   { "name": "KC_DB_USERNAME", "value": "${{ env.KC_DB_USERNAME }}" },
                   { "name": "KC_DB_PASSWORD", "value": "${{ env.KC_DB_PASSWORD }}" },
-                ]
+                ],
                 "command": ["start"],
                 "essential": true,
                 "logConfiguration": {
