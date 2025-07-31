@@ -64,7 +64,7 @@ jobs:
             "containerDefinitions": [
               {
                 "name": "${{ env.CONTAINER_NAME }}",
-                "image": "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+                "image": "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}",
                 "portMappings": [{ "containerPort": 8080 },{ "containerPort": 8443 }],
                 "environment": [
                   { "name": "KEYCLOAK_ADMIN", "value": "admin" },
@@ -79,7 +79,6 @@ jobs:
                   { "name": "KC_DB_USERNAME", "valueFrom": "arn:aws:secretsmanager:us-east-1:009215122583:secret:rds!db-0deeb6e5-429b-47e0-8b9a-2b46d98eb11d-1lLGmu:username::"},
                   { "name": "KC_DB_PASSWORD", "valueFrom": "arn:aws:secretsmanager:us-east-1:009215122583:secret:rds!db-0deeb6e5-429b-47e0-8b9a-2b46d98eb11d-1lLGmu:password::" }
                 ],
-                "command": ["start"],
                 "essential": true,
                 "logConfiguration": {
                   "logDriver": "awslogs",
