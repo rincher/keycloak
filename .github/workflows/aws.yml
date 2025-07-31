@@ -64,8 +64,8 @@ jobs:
                   { "name": "KC_PROXY_HEADERS", "value": "xforwarded" }
                 ],
                 "secrets": [
-                  { "name": "KC_DB_USERNAME", "valueFrom": "arn:aws:secretsmanager:us-east-1:009215122583:secret:rds!db-0deeb6e5-429b-47e0-8b9a-2b46d98eb11d-1lLGmu:SecretString:username::"},
-                  { "name": "KC_DB_PASSWORD", "valueFrom": "arn:aws:secretsmanager:us-east-1:009215122583:secret:rds!db-0deeb6e5-429b-47e0-8b9a-2b46d98eb11d-1lLGmu:SecretString:passwrod::" }
+                  { "name": "KC_DB_USERNAME", "valueFrom": "arn:aws:secretsmanager:us-east-1:009215122583:secret:rds!db-0deeb6e5-429b-47e0-8b9a-2b46d98eb11d-1lLGmu::username::"},
+                  { "name": "KC_DB_PASSWORD", "valueFrom": "arn:aws:secretsmanager:us-east-1:009215122583:secret:rds!db-0deeb6e5-429b-47e0-8b9a-2b46d98eb11d-1lLGmu::passwrod::" }
                 ],
                 "command": ["start"],
                 "essential": true,
