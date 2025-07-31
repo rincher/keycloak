@@ -10,7 +10,7 @@ env:
   ECS_CLUSTER: keycloak
   ECS_SERVICE: keycloak-service
   ECS_TASK_FAMILY: keycloak
-  SECRET_NAME: rds!db-0deeb6e5-429b-47e0-8b9a-2b46d98eb11d
+  SECRET_NAME: ${{ secrets.SECRET_NAME }}
   CONTAINER_NAME: keycloak
   IMAGE_TAG: ${{ github.sha }}
 
