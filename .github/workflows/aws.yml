@@ -62,11 +62,10 @@ jobs:
                   { "name": "KC_HOSTNAME", "value": "keycloak.hyundong.shop" },
                   { "name": "KC_HTTP_ENABLED", "value": "true" },
                   { "name": "KC_PROXY_HEADERS", "value": "xforwarded" }
-                  
                 ],
                 "secrets": [
                   { "name": "KC_DB_USERNAME", "value": "${{ env.KC_DB_USERNAME }}" },
-                  { "name": "KC_DB_PASSWORD", "value": "${{ env.KC_DB_PASSWORD }}" },
+                  { "name": "KC_DB_PASSWORD", "value": "${{ env.KC_DB_PASSWORD }}" }
                 ],
                 "command": ["start"],
                 "essential": true,
