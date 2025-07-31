@@ -9,7 +9,7 @@ env:
   ECS_CLUSTER: keycloak
   ECS_SERVICE: keycloak-service
   ECS_TASK_FAMILY: keycloak
-  SECRET_NAME: ${{ secrets.SECRET_NAME }}
+  SECRET_NAME: "${{ secrets.SECRET_NAME }}"
   CONTAINER_NAME: keycloak
   KEYCLOAK_IMAGE: quay.io/keycloak/keycloak:24.0.3 # 공식 이미지 사용
 
